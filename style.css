@@ -1,0 +1,78 @@
+/* TimeDrops 官网共享样式：纯静态站点，不依赖外部资源 */
+:root {
+  --td-bg: #ffffff;
+  --td-text: #1f2329;
+  --td-secondary: #5a6270;
+  --td-accent: #2f6fe0;
+  --td-border: #e3e7ee;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --td-bg: #14171c;
+    --td-text: #e8ebf0;
+    --td-secondary: #9aa3b2;
+    --td-accent: #6ea8ff;
+    --td-border: #2b313b;
+  }
+}
+
+html {
+  background: var(--td-bg);
+  color: var(--td-text);
+}
+
+body {
+  margin: 0 auto;
+  max-width: 46rem;
+  padding: 2rem 1.25rem 3rem;
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Noto Sans SC", sans-serif;
+  line-height: 1.75;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 1rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 1.8rem 0 0.6rem;
+}
+
+p, li {
+  color: var(--td-text);
+}
+
+a {
+  color: var(--td-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  color: var(--td-secondary);
+  font-size: 0.85rem;
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--td-border);
+  color: var(--td-secondary);
+  font-size: 0.85rem;
+}
+
+footer a {
+  margin-right: 1rem;
+}
+
+code {
+  background: var(--td-border);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
