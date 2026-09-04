@@ -2,6 +2,12 @@
 
 本目录是 `timedrops.544788.xyz` 的 Cloudflare Pages 内容源，GitHub 仓库为 `jodis/TimeDropsSite`。
 
+## 部署状态（2026-09-04）
+
+- 生产构建已包含 KV 绑定 `SUPPORT_REPORTS` 与加密 Secret `RATE_LIMIT_SALT`，接口已上线。
+- 线上验证通过：首写 201、同编号重放 200 幂等、非法字段/非法 JSON 400、每 IP 每小时 6 次 429；`_headers` 安全响应头生效。
+- 待办：Email Routing 测试邮件确认 `support@544788.xyz` 可达；在 Cloudflare WAF 复核自定义/托管规则不误拦 App 客户端（已验证 `okhttp`、`Dalvik` 与浏览器 UA 正常到达应用层）；清理 KV 中的上线测试报告。
+
 ## 组成
 
 - 静态官网：根目录 HTML/CSS，无构建步骤。
