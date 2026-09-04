@@ -1,50 +1,88 @@
-# TimeDrops 官网部署说明
+# TimeDrops 官网与支持接口部署说明
 
-本目录是 `timedrops.544788.xyz`（Cloudflare Pages）的内容源。
+本目录是 `timedrops.544788.xyz` 的 Cloudflare Pages 内容源，GitHub 仓库为 `jodis/TimeDropsSite`。
 
-## 部署步骤
+## 组成
 
-1. 本目录包含纯静态 HTML/CSS，无需构建。
-2. 推送到 GitHub 仓库 `jodis/TimeDropsSite`：
+- 静态官网：根目录 HTML/CSS，无构建步骤。
+- 公开账号删除入口：`/account-deletion.html`，无需登录，可通过客服邮箱发起申请。
+- 在线反馈接口：Pages Function `POST /api/reports`。
+- 反馈存储：Cloudflare Workers KV；普通反馈自动保留 90 天，诊断正文单独保存并自动保留 30 天。
+
+## 首次配置在线反馈
+
+1. 在 Cloudflare 创建专用 KV namespace，例如 `timedrops-support-reports`。
+2. 打开 Pages 项目 `timedrops-site` → Settings → Functions → KV namespace bindings。
+3. 为 **Production** 增加变量名 `SUPPORT_REPORTS`，绑定上一步的 namespace。Preview 环境应绑定独立测试 namespace，禁止复用生产反馈。
+4. 在 Pages 生产环境添加加密 Secret `RATE_LIMIT_SALT`，值使用密码管理器生成的至少 32 字符随机串；Preview 使用不同值。不得写入仓库、构建日志或普通环境变量。
+5. 重新部署 `main`。缺少 KV 绑定或限流 Secret 时接口固定返回 503，不会伪造提交成功。
+6. 建议在 Cloudflare WAF 为 `/api/reports` 再配置按 IP 的速率限制。Function 内已有每 IP 每小时 6 次的基础限制，但 KV 计数是最终一致的，不能替代边缘 WAF。
+7. 仅允许负责支持的人员访问该 namespace；不要把 KV 访问 Token、Cloudflare API Token 或导出数据写入仓库和日志。
+
+## 发布
+
+Pages 已连接 GitHub `main` 分支；推送后自动部署：
 
 ```bash
 cd site
-git init
-git add *.html *.css recovery
-git commit -m "官网初始内容"
-git branch -M main
-git remote add origin https://github.com/jodis/TimeDropsSite.git
-git push -u origin main --force
+npm test
+git add .
+git commit -m "上线账号删除入口与在线反馈接口"
+git push origin main
 ```
 
-3. 在 Cloudflare Pages 项目（`timedrops-site`）中：
-   - 生产分支：`main`
-   - 构建命令：`echo "Skip build"`
-   - 自定义域名：添加 `timedrops.544788.xyz`（Cloudflare 自动签发证书）
+Cloudflare Pages 保持无构建配置，或使用 `echo "Skip build"`。Functions 会由 Pages 自动识别和部署。
 
-4. 验证：`https://timedrops.544788.xyz/` 及其下 `/privacy.html`、`/terms.html`、`/account-deletion.html`、`/support.html`、`/recovery/` 均可访问。
+## 上线验证
 
-## 当前内容使用的默认值（发布前需逐项确认）
+静态页面：
 
-以下内容已按建议默认值写入页面，**上架前必须核对**，改完直接推新版本即可：
+- `https://timedrops.544788.xyz/`
+- `https://timedrops.544788.xyz/privacy.html`
+- `https://timedrops.544788.xyz/terms.html`
+- `https://timedrops.544788.xyz/account-deletion.html`
+- `https://timedrops.544788.xyz/support.html`
+- `https://timedrops.544788.xyz/recovery/`
+
+接口检查使用一次性随机 UUID，不要提交真实诊断或个人信息：
+
+```bash
+REPORT_ID="$(python3 -c 'import uuid; print(uuid.uuid4())')"
+curl -i 'https://timedrops.544788.xyz/api/reports' \
+  -H 'Content-Type: application/json' \
+  -H "X-TimeDrops-Report-Id: $REPORT_ID" \
+  --data "{\"reportId\":\"$REPORT_ID\",\"category\":\"other\",\"message\":\"上线连通性测试，可删除\",\"appVersion\":\"deployment-check\",\"versionCode\":1,\"hasDiagnostics\":false,\"diagnostics\":null}"
+```
+
+预期首次返回 `201`，同一编号重放返回 `200` 且 `duplicate=true`。随后在 KV 中删除该测试报告。还需验证错误 JSON、超长正文、错误分类、幂等和 429；测试不得使用生产用户数据。
+
+正式 RC 通过环境变量注入：
+
+```text
+TIMEDROPS_SUPPORT_ENDPOINT=https://timedrops.544788.xyz/api/reports
+TIMEDROPS_ACCOUNT_DELETION_URL=https://timedrops.544788.xyz/account-deletion.html
+TIMEDROPS_SUPPORT_URL=https://timedrops.544788.xyz/support.html
+```
+
+不要把这些构建值硬编码进新代码；继续由 `tools/release/run_rc.sh` 注入。
+
+## 当前公开口径与发布前确认
 
 | 项目 | 当前值 | 需要确认 |
 |---|---|---|
-| 发布主体 | "TimeDrops（中国大陆个人开发者）" | 已定；如 Play 商店要求展示真实姓名再改（隐私/terms 页各一处） |
-| 所在国家/地区 | 中国大陆（中华人民共和国），terms 第 11 节 + privacy 第 9 节已写明 | 已定 |
-| 联系邮箱 | support@544788.xyz | **需在 Cloudflare Email Routing 建立该别名并转发到真实邮箱**，否则收不到邮件 |
+| 发布主体 | TimeDrops（中国大陆个人开发者） | 如 Play 商店要求展示真实姓名再改 |
+| 联系邮箱 | support@544788.xyz | 发送测试邮件确认 Email Routing 可达 |
 | 生效/更新日期 | 2026 年 9 月 | 上架当天更新为具体日期 |
-| 服务部署地区 | "以启用时页面说明为准" | Appwrite 实际部署地区确定后补写 |
-| 反馈/诊断保留期 | 90 天 / 30 天 / 30 天 | 如与最终服务实现不一致，修改 |
+| 在线反馈处理方 | Cloudflare Workers / Workers KV | 法律与跨境处理口径复核 |
+| 反馈保留期 | 普通反馈 90 天；诊断正文 30 天 | 与 KV TTL 和隐私政策保持一致 |
+| 账号删除时限 | 完成身份核验后通常 30 日内 | 法律复核并建立工单处理流程 |
 | 儿童政策 | 不专门面向 13 岁以下 | 与 Play 目标受众设置一致 |
 
-## 尚未发布、暂不放上去的内容
+## 运维约定
 
-- `.well-known/assetlinks.json`（App Links）：需要最终 Play App Signing / Release 签名证书指纹后才能生成，届时加入 `recovery/` 相关路径。
-- 在线反馈 API、账号/Recovery 功能：首发 AAB 中这些入口由 Feature Gate 关闭；页面只作"启用后"说明，不对外提供未部署的服务。
-
-## 维护约定
-
-- 法律页面改动：修改对应 HTML → 推 `main` → Pages 自动部署（分钟级）。
-- 隐私政策与 `docs/PRIVACY_POLICY_DRAFT_CN.md`、Data Safety 披露保持逐项一致；功能矩阵变化时同步改 Data Safety。
-- 不在这套页面中放任何需要登录才能查看的内容。
+- 每周查看 KV 中新增报告；处理记录不得复制到非受控文档。
+- 只通过报告编号关联工单。回复或删除请求需要人工核验时，不要求用户提供密码、验证码、Session、密钥或身份证件照片。
+- 普通报告和诊断记录分别使用 `report:<UUID>`、`diagnostic:<UUID>`；诊断记录可先到期，属于正常行为。
+- 用户申请提前删除反馈时，核验报告短编号和大致时间后删除对应两条 key。
+- 法律页面、保留期、接口处理方或 Feature Gate 变化时，同步更新隐私政策、Data Safety 草案和应用内文案。
+- `.well-known/assetlinks.json` 仍需最终 Play App Signing / Release 签名证书指纹后再部署。
