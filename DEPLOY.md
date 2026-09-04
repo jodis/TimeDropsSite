@@ -15,7 +15,8 @@
 2. 打开 Pages 项目 `timedrops-site` → Settings → Functions → KV namespace bindings。
 3. 为 **Production** 增加变量名 `SUPPORT_REPORTS`，绑定上一步的 namespace。Preview 环境应绑定独立测试 namespace，禁止复用生产反馈。
 4. 在 Pages 生产环境添加加密 Secret `RATE_LIMIT_SALT`，值使用密码管理器生成的至少 32 字符随机串；Preview 使用不同值。不得写入仓库、构建日志或普通环境变量。
-5. 重新部署 `main`。缺少 KV 绑定或限流 Secret 时接口固定返回 503，不会伪造提交成功。
+5. **完成绑定/Secret 后必须再触发一次全新部署**（再推一个 commit，或在 Cloudflare Pages 控制台点 Redeploy / Deploy to production）。Pages 会把绑定快照进某一次部署：部署之后补加的 KV 绑定不会生效，Function 会一直返回 `503 service_unavailable`。
+6. 缺少 KV 绑定或限流 Secret 时接口固定返回 503，不会伪造提交成功；拿到 201/429 等真实业务码即证明绑定已生效。
 6. 建议在 Cloudflare WAF 为 `/api/reports` 再配置按 IP 的速率限制。Function 内已有每 IP 每小时 6 次的基础限制，但 KV 计数是最终一致的，不能替代边缘 WAF。
 7. 仅允许负责支持的人员访问该 namespace；不要把 KV 访问 Token、Cloudflare API Token 或导出数据写入仓库和日志。
 
