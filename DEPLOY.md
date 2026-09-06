@@ -13,7 +13,7 @@
 - 静态官网：根目录 HTML/CSS，无构建步骤。
 - 公开账号删除入口：`/account-deletion.html`，无需登录，可通过客服邮箱发起申请。
 - 在线反馈接口：Pages Function `POST /api/reports`。
-- 密码恢复接口：Pages Function `POST /api/recovery`，无状态转发 Appwrite 原生 recovery 确认请求；不记录或存储恢复链接参数和新密码。
+- 密码恢复接口：Pages Function `POST /api/recovery`，无状态转发 Appwrite 原生 `PUT /account/recovery` 确认请求；不记录或存储恢复链接参数和新密码。
 - 反馈存储：Cloudflare Workers KV；普通反馈自动保留 90 天，诊断正文单独保存并自动保留 30 天。
 
 ## 首次配置在线反馈

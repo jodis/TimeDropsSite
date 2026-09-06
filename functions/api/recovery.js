@@ -24,7 +24,7 @@ export async function onRequestPost({ request, env }) {
 
   try {
     const upstream = await fetch(`${env.APPWRITE_ENDPOINT.replace(/\/$/, '')}/account/recovery`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-Appwrite-Project': env.APPWRITE_PROJECT_ID,

@@ -58,7 +58,7 @@ test('恢复接口只向 Appwrite 转发合规的一次性凭据', async () => {
     });
     assert.equal(response.status, 200);
     assert.equal(forwarded.url, 'https://appwrite.example/v1/account/recovery');
-    assert.equal(forwarded.options.method, 'PATCH');
+    assert.equal(forwarded.options.method, 'PUT');
     assert.equal(forwarded.options.headers['X-Appwrite-Project'], 'public-project');
     assert.deepEqual(JSON.parse(forwarded.options.body), {
       userId: 'test-user', secret: 'test-secret', password: 'valid-password',
