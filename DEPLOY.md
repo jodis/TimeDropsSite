@@ -13,6 +13,7 @@
 - 静态官网：根目录 HTML/CSS，无构建步骤。
 - 公开账号删除入口：`/account-deletion.html`，无需登录，可通过客服邮箱发起申请。
 - 在线反馈接口：Pages Function `POST /api/reports`。
+- 密码恢复接口：Pages Function `POST /api/recovery`，无状态转发 Appwrite 原生 recovery 确认请求；不记录或存储恢复链接参数和新密码。
 - 反馈存储：Cloudflare Workers KV；普通反馈自动保留 90 天，诊断正文单独保存并自动保留 30 天。
 
 ## 首次配置在线反馈
@@ -22,6 +23,7 @@
 3. 为 **Production** 增加变量名 `SUPPORT_REPORTS`，绑定上一步的 namespace。Preview 环境应绑定独立测试 namespace，禁止复用生产反馈。
 4. 在 Pages 生产环境添加加密 Secret `RATE_LIMIT_SALT`，值使用密码管理器生成的至少 32 字符随机串；Preview 使用不同值。不得写入仓库、构建日志或普通环境变量。
 5. **完成绑定/Secret 后必须再触发一次全新部署**（再推一个 commit，或在 Cloudflare Pages 控制台点 Redeploy / Deploy to production）。Pages 会把绑定快照进某一次部署：部署之后补加的 KV 绑定不会生效，Function 会一直返回 `503 service_unavailable`。
+6. 为 Production 与 Preview 分别配置普通 Pages 环境变量 `APPWRITE_ENDPOINT`、`APPWRITE_PROJECT_ID`，供 `/api/recovery` 调用 Appwrite 原生 recovery API。两者是公开客户端标识，仍不得写入仓库；**不得**配置管理 API Key、SMTP 凭据或任何服务端密钥。缺少任一变量时恢复接口固定返回 `503`。
 6. 缺少 KV 绑定或限流 Secret 时接口固定返回 503，不会伪造提交成功；拿到 201/429 等真实业务码即证明绑定已生效。
 6. 建议在 Cloudflare WAF 为 `/api/reports` 再配置按 IP 的速率限制。Function 内已有每 IP 每小时 6 次的基础限制，但 KV 计数是最终一致的，不能替代边缘 WAF。
 7. 仅允许负责支持的人员访问该 namespace；不要把 KV 访问 Token、Cloudflare API Token 或导出数据写入仓库和日志。
@@ -50,6 +52,7 @@ Cloudflare Pages 保持无构建配置，或使用 `echo "Skip build"`。Functio
 - `https://timedrops.544788.xyz/account-deletion.html`
 - `https://timedrops.544788.xyz/support.html`
 - `https://timedrops.544788.xyz/recovery/`
+- `POST https://timedrops.544788.xyz/api/recovery`（只用虚构参数验证 400/503 路径；禁止用真实 recovery secret 进行 curl 或日志验证）
 
 接口检查使用一次性随机 UUID，不要提交真实诊断或个人信息：
 

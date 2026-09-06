@@ -1,0 +1,65 @@
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+  const secret = params.get('secret');
+  // 一次性凭据只存在当前页面内存；尽早清除地址栏，避免复制、历史记录和 Referer 泄露。
+  window.history.replaceState(null, '', '/recovery/');
+
+  const form = document.querySelector('#recovery-form');
+  const password = document.querySelector('#new-password');
+  const confirmation = document.querySelector('#confirm-password');
+  const submit = document.querySelector('#recovery-submit');
+  const status = document.querySelector('#recovery-status');
+
+  const showStatus = (message) => {
+    status.textContent = message;
+    status.hidden = false;
+  };
+
+  if (!userId || !secret) {
+    form.hidden = true;
+    showStatus('恢复链接无效、已过期或已使用。请回到 TimeDrops 重新发送恢复邮件。');
+    return;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const newPassword = password.value;
+    if (newPassword.length < 8 || newPassword.length > 256) {
+      showStatus('密码长度需为 8 至 256 个字符。');
+      return;
+    }
+    if (newPassword !== confirmation.value) {
+      showStatus('两次输入的密码不一致。');
+      return;
+    }
+
+    submit.disabled = true;
+    showStatus('正在重置密码…');
+    try {
+      const response = await fetch('/api/recovery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        body: JSON.stringify({ userId, secret, password: newPassword }),
+      });
+      const body = await response.json().catch(() => null);
+      if (response.ok && body?.ok) {
+        password.value = '';
+        confirmation.value = '';
+        form.hidden = true;
+        showStatus('密码已重置。请返回 TimeDrops，使用新密码登录。');
+      } else if (body?.code === 'invalid_or_expired_link') {
+        showStatus('恢复链接无效、已过期或已使用。请回到 TimeDrops 重新发送恢复邮件。');
+        submit.disabled = false;
+      } else {
+        showStatus('服务暂时不可用，请稍后重试。');
+        submit.disabled = false;
+      }
+    } catch {
+      showStatus('网络连接失败，请检查网络后重试。');
+      submit.disabled = false;
+    }
+  });
+})();

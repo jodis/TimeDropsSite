@@ -1,6 +1,36 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>密码恢复 · TimeDrops</title><link rel="stylesheet" href="/style.css"></head>
-<body><div class="site-shell"><header class="site-header"><div class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>TimeDrops</a></div></header>
-<main class="content"><section class="page-intro"><p class="eyebrow">Secure link</p><h1>继续在 TimeDrops 中完成操作</h1><p class="lead">此页面只用于协助应用处理密码恢复链接。请返回邮件并在已安装 TimeDrops 的设备上打开原链接。</p></section>
-<div class="legal-stack"><article class="legal-card"><h2>安全提醒</h2><ul class="compact-list"><li>链接具有时效性，请勿转发或截图分享。</li><li>如果不是你发起的请求，直接忽略该邮件即可。</li><li>不要在任何网页或邮件中回复密码、验证码或其他凭据。</li></ul></article><article class="notice"><p>无法继续时，请通过<a href="/support.html">帮助与支持</a>联系 TimeDrops。</p></article></div></main>
-<footer class="site-footer"><div class="footer-row"><span>TimeDrops · 本地影像记录与生成</span><nav class="footer-links" aria-label="页脚导航"><a href="/privacy.html">隐私政策</a><a href="/terms.html">服务条款</a><a href="/support.html">帮助与支持</a></nav></div></footer></div></body></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>重置密码 · TimeDrops</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/recovery/recovery.js" defer></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header"><div class="topbar"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>TimeDrops</a></div></header>
+    <main class="content">
+      <section class="page-intro">
+        <p class="eyebrow">Password recovery</p>
+        <h1>设置新密码</h1>
+        <p class="lead">请为 TimeDrops 账号设置新密码。完成后回到 App 使用新密码登录。</p>
+      </section>
+      <section class="legal-card" aria-labelledby="recovery-form-title">
+        <h2 id="recovery-form-title">重置登录密码</h2>
+        <form id="recovery-form" novalidate>
+          <label for="new-password">新密码</label>
+          <input id="new-password" name="password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
+          <label for="confirm-password">确认新密码</label>
+          <input id="confirm-password" name="confirmation" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
+          <p id="recovery-status" class="notice" role="status" aria-live="polite" hidden></p>
+          <button id="recovery-submit" type="submit">确认重置密码</button>
+        </form>
+      </section>
+      <article class="notice"><p>恢复链接只能使用一次。请勿转发邮件、链接、密码或验证码；如果链接失效，请回到 TimeDrops 重新发送恢复邮件。</p></article>
+    </main>
+    <footer class="site-footer"><div class="footer-row"><span>TimeDrops · 本地影像记录与生成</span><nav class="footer-links" aria-label="页脚导航"><a href="/privacy.html">隐私政策</a><a href="/terms.html">服务条款</a><a href="/support.html">帮助与支持</a></nav></div></footer>
+  </div>
+</body>
+</html>
