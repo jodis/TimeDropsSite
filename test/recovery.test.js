@@ -15,6 +15,8 @@ test('恢复表单在脚本失效时禁止录入且不会通过 URL 提交密码
   const html = await readFile(new URL('../recovery/index.html', import.meta.url), 'utf8');
   const script = await readFile(new URL('../recovery/recovery.js', import.meta.url), 'utf8');
   const headers = await readFile(new URL('../_headers', import.meta.url), 'utf8');
+  assert.match(html, /style\.css\?v=[0-9-]+/);
+  assert.match(html, /recovery\.js\?v=[0-9-]+/);
   assert.match(html, /<fieldset id="recovery-fields" disabled>/);
   assert.match(html, /<form id="recovery-form" method="post"/);
   assert.doesNotMatch(html, /name="(?:password|confirmation)"/);
