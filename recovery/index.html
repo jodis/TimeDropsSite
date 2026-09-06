@@ -17,16 +17,35 @@
         <h1>设置新密码</h1>
         <p class="lead">请为 TimeDrops 账号设置新密码。完成后回到 App 使用新密码登录。</p>
       </section>
-      <section class="legal-card" aria-labelledby="recovery-form-title">
-        <h2 id="recovery-form-title">重置登录密码</h2>
+      <section class="legal-card recovery-card" aria-labelledby="recovery-form-title">
+        <div class="recovery-card-heading">
+          <span class="recovery-lock" aria-hidden="true"></span>
+          <div>
+            <h2 id="recovery-form-title">创建新的登录密码</h2>
+            <p>新密码设置成功后，旧密码将立即失效。</p>
+          </div>
+        </div>
         <!-- 默认禁用并显式 POST：脚本未加载时不能输入，且浏览器绝不能把密码拼入 URL。 -->
         <form id="recovery-form" method="post" action="/recovery/" novalidate>
+          <!-- 仅帮助浏览器正确识别密码更新表单；不带 name、值或提交能力。 -->
+          <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" hidden>
           <fieldset id="recovery-fields" disabled>
-            <label for="new-password">新密码</label>
-            <input id="new-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
-            <label for="confirm-password">确认新密码</label>
-            <input id="confirm-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
-            <button id="recovery-submit" type="submit">确认重置密码</button>
+            <div class="password-field">
+              <label for="new-password">新密码</label>
+              <div class="password-control">
+                <input id="new-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" placeholder="请输入新密码" required>
+                <button class="password-toggle" type="button" data-target="new-password" aria-label="显示新密码" aria-pressed="false">显示</button>
+              </div>
+              <p class="field-hint">使用 8–256 个字符，建议组合字母、数字和符号。</p>
+            </div>
+            <div class="password-field">
+              <label for="confirm-password">确认新密码</label>
+              <div class="password-control">
+                <input id="confirm-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" placeholder="请再次输入新密码" required>
+                <button class="password-toggle" type="button" data-target="confirm-password" aria-label="显示确认密码" aria-pressed="false">显示</button>
+              </div>
+            </div>
+            <button id="recovery-submit" class="recovery-submit" type="submit">确认重置密码</button>
           </fieldset>
           <p id="recovery-status" class="notice" role="status" aria-live="polite">正在安全加载恢复页面…</p>
         </form>

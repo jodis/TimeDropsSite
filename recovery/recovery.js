@@ -11,6 +11,7 @@
   const confirmation = document.querySelector('#confirm-password');
   const submit = document.querySelector('#recovery-submit');
   const status = document.querySelector('#recovery-status');
+  const passwordToggles = document.querySelectorAll('.password-toggle');
 
   const showStatus = (message) => {
     status.textContent = message;
@@ -26,6 +27,17 @@
   // 只有脚本成功运行且链接参数完整时才允许录入密码，避免脚本失效时回退为原生表单提交。
   fields.disabled = false;
   status.hidden = true;
+  passwordToggles.forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      const input = document.querySelector(`#${toggle.dataset.target}`);
+      if (!input) return;
+      const willShow = input.type === 'password';
+      input.type = willShow ? 'text' : 'password';
+      toggle.textContent = willShow ? '隐藏' : '显示';
+      toggle.setAttribute('aria-pressed', String(willShow));
+      toggle.setAttribute('aria-label', `${willShow ? '隐藏' : '显示'}${input.id === 'new-password' ? '新密码' : '确认密码'}`);
+    });
+  });
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const newPassword = password.value;
