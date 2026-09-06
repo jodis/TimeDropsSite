@@ -13,9 +13,11 @@ function request(payload, contentType = 'application/json') {
 
 test('恢复表单在脚本失效时禁止录入且不会通过 URL 提交密码', async () => {
   const html = await readFile(new URL('../recovery/index.html', import.meta.url), 'utf8');
+  const headers = await readFile(new URL('../_headers', import.meta.url), 'utf8');
   assert.match(html, /<fieldset id="recovery-fields" disabled>/);
   assert.match(html, /<form id="recovery-form" method="post"/);
   assert.doesNotMatch(html, /name="(?:password|confirmation)"/);
+  assert.match(headers, /\/recovery\/\*[\s\S]*connect-src 'self'/);
 });
 
 test('恢复接口缺少公开客户端配置时失败关闭', async () => {
