@@ -74,6 +74,7 @@ h1 { max-width: 14ch; margin: 0; font-size: clamp(2.3rem, 7vw, 4.5rem); line-hei
 .notice strong { color: var(--td-text); }
 /* 密码恢复页仅使用站内样式；输入框与按钮不依赖第三方脚本或远端资源。 */
 #recovery-form { display: grid; gap: .7rem; }
+#recovery-fields { display: grid; min-width: 0; margin: 0; padding: 0; border: 0; gap: .7rem; }
 #recovery-form label { margin-top: .35rem; color: var(--td-text); font-weight: 700; }
 #recovery-form input { min-height: 2.85rem; padding: .55rem .75rem; border: 1px solid var(--td-border); border-radius: .75rem; color: var(--td-text); background: var(--td-surface-soft); font: inherit; }
 #recovery-form button { min-height: 2.85rem; margin-top: .5rem; border: 0; border-radius: 1rem; color: #fff; background: var(--td-primary-strong); font: inherit; font-weight: 750; cursor: pointer; }

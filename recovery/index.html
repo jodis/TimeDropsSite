@@ -19,13 +19,16 @@
       </section>
       <section class="legal-card" aria-labelledby="recovery-form-title">
         <h2 id="recovery-form-title">重置登录密码</h2>
-        <form id="recovery-form" novalidate>
-          <label for="new-password">新密码</label>
-          <input id="new-password" name="password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
-          <label for="confirm-password">确认新密码</label>
-          <input id="confirm-password" name="confirmation" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
-          <p id="recovery-status" class="notice" role="status" aria-live="polite" hidden></p>
-          <button id="recovery-submit" type="submit">确认重置密码</button>
+        <!-- 默认禁用并显式 POST：脚本未加载时不能输入，且浏览器绝不能把密码拼入 URL。 -->
+        <form id="recovery-form" method="post" action="/recovery/" novalidate>
+          <fieldset id="recovery-fields" disabled>
+            <label for="new-password">新密码</label>
+            <input id="new-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
+            <label for="confirm-password">确认新密码</label>
+            <input id="confirm-password" type="password" minlength="8" maxlength="256" autocomplete="new-password" required>
+            <button id="recovery-submit" type="submit">确认重置密码</button>
+          </fieldset>
+          <p id="recovery-status" class="notice" role="status" aria-live="polite">正在安全加载恢复页面…</p>
         </form>
       </section>
       <article class="notice"><p>恢复链接只能使用一次。请勿转发邮件、链接、密码或验证码；如果链接失效，请回到 TimeDrops 重新发送恢复邮件。</p></article>

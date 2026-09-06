@@ -6,6 +6,7 @@
   window.history.replaceState(null, '', '/recovery/');
 
   const form = document.querySelector('#recovery-form');
+  const fields = document.querySelector('#recovery-fields');
   const password = document.querySelector('#new-password');
   const confirmation = document.querySelector('#confirm-password');
   const submit = document.querySelector('#recovery-submit');
@@ -17,11 +18,14 @@
   };
 
   if (!userId || !secret) {
-    form.hidden = true;
+    fields.hidden = true;
     showStatus('恢复链接无效、已过期或已使用。请回到 TimeDrops 重新发送恢复邮件。');
     return;
   }
 
+  // 只有脚本成功运行且链接参数完整时才允许录入密码，避免脚本失效时回退为原生表单提交。
+  fields.disabled = false;
+  status.hidden = true;
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const newPassword = password.value;
