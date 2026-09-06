@@ -52,7 +52,7 @@
       if (response.ok && body?.ok) {
         password.value = '';
         confirmation.value = '';
-        form.hidden = true;
+        fields.hidden = true;
         showStatus('密码已重置。请返回 TimeDrops，使用新密码登录。');
       } else if (body?.code === 'invalid_or_expired_link') {
         showStatus('恢复链接无效、已过期或已使用。请回到 TimeDrops 重新发送，并只打开最新一封邮件中的链接。');
