@@ -57,8 +57,11 @@
       } else if (body?.code === 'invalid_or_expired_link') {
         showStatus('恢复链接无效、已过期或已使用。请回到 TimeDrops 重新发送，并只打开最新一封邮件中的链接。');
         submit.disabled = false;
+      } else if (body?.code === 'password_rejected') {
+        showStatus('新密码不符合服务要求，请更换密码后重试。');
+        submit.disabled = false;
       } else {
-        showStatus('服务暂时不可用，请稍后重试。');
+        showStatus('恢复服务配置异常或暂时不可用，请稍后重试。');
         submit.disabled = false;
       }
     } catch {

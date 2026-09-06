@@ -35,10 +35,18 @@ export async function onRequestPost({ request, env }) {
         password: input.password,
       }),
     });
-    // 一次性链接无效、过期、已使用及上游拒绝均返回同一结果，避免暴露恢复状态细节。
-    return upstream.ok
-      ? response(200, { ok: true })
-      : response(400, { ok: false, code: 'invalid_or_expired_link' });
+    if (upstream.ok) return response(200, { ok: true });
+
+    // 只解析稳定错误类型用于区分部署配置与一次性 token；不记录或回传 Appwrite 响应正文。
+    const upstreamError = await upstream.json().catch(() => null);
+    const upstreamType = typeof upstreamError?.type === 'string' ? upstreamError.type : '';
+    if (upstream.status >= 500 || upstream.status === 401 || upstream.status === 403 || upstreamType.includes('project')) {
+      return response(503, { ok: false, code: 'service_misconfigured' });
+    }
+    if (upstreamType === 'general_argument_invalid') {
+      return response(400, { ok: false, code: 'password_rejected' });
+    }
+    return response(400, { ok: false, code: 'invalid_or_expired_link' });
   } catch {
     return response(503, { ok: false, code: 'service_unavailable' });
   }

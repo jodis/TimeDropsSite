@@ -26,6 +26,24 @@ test('恢复接口缺少公开客户端配置时失败关闭', async () => {
   assert.deepEqual(await response.json(), { ok: false, code: 'service_unavailable' });
 });
 
+test('恢复接口把 Appwrite 项目配置错误与 token 无效安全区分', async () => {
+  const previousFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(
+    JSON.stringify({ type: 'project_unknown', message: 'not returned to browser' }),
+    { status: 401, headers: { 'content-type': 'application/json' } },
+  );
+  try {
+    const response = await onRequestPost({
+      request: request({ userId: 'test-user', secret: 'test-secret', password: 'valid-password' }),
+      env: { APPWRITE_ENDPOINT: 'https://appwrite.example/v1', APPWRITE_PROJECT_ID: 'wrong-project' },
+    });
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { ok: false, code: 'service_misconfigured' });
+  } finally {
+    globalThis.fetch = previousFetch;
+  }
+});
+
 test('恢复接口只向 Appwrite 转发合规的一次性凭据', async () => {
   const previousFetch = globalThis.fetch;
   let forwarded;
