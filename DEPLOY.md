@@ -15,6 +15,8 @@
 - 在线反馈接口：Pages Function `POST /api/reports`。
 - 密码恢复接口：Pages Function `POST /api/recovery`，无状态转发 Appwrite 原生 `PUT /account/recovery` 确认请求；不记录或存储恢复链接参数和新密码。
 - 反馈存储：Cloudflare Workers KV；普通反馈自动保留 90 天，诊断正文单独保存并自动保留 30 天。
+- 私有反馈管理：`/admin/reports.html` + `/api/admin/reports`；必须由 Cloudflare Access 保护，函数内还会独立验证 Access JWT、Audience 和管理员邮箱白名单。
+- 可选 Webhook：反馈持久化后只发送分类、报告短编号、时间、版本和是否含诊断，不发送反馈正文、设备字段或诊断内容；通知失败不影响用户已经成功提交的反馈。
 
 ## 首次配置在线反馈
 
@@ -27,6 +29,28 @@
 6. 缺少 KV 绑定或限流 Secret 时接口固定返回 503，不会伪造提交成功；拿到 201/429 等真实业务码即证明绑定已生效。
 6. 建议在 Cloudflare WAF 为 `/api/reports` 再配置按 IP 的速率限制。Function 内已有每 IP 每小时 6 次的基础限制，但 KV 计数是最终一致的，不能替代边缘 WAF。
 7. 仅允许负责支持的人员访问该 namespace；不要把 KV 访问 Token、Cloudflare API Token 或导出数据写入仓库和日志。
+
+## 配置私有反馈管理页
+
+1. 在 Cloudflare Zero Trust → Access → Applications 创建一个 **Self-hosted** 应用；使用同一应用/Audience保护以下两个路径：
+   - `timedrops.544788.xyz/admin/*`
+   - `timedrops.544788.xyz/api/admin/*`
+2. Access Policy 只允许负责支持的指定账号登录，不能使用 Everyone、Bypass 或公开策略。
+3. 在 Pages Production 环境配置：
+   - `CF_ACCESS_TEAM_DOMAIN`：Access Team Domain，例如 `https://<team>.cloudflareaccess.com`；
+   - `CF_ACCESS_AUD`：上述 Access 应用的 Application Audience；
+   - `SUPPORT_ADMIN_EMAILS`：允许查看反馈的账号邮箱，多个值以英文逗号分隔。
+4. Preview 必须使用独立 Access 应用/Audience、管理员白名单和测试 KV；不得让 Preview 读取生产反馈。
+5. 配置后重新部署，再访问 `/admin/reports.html`：未登录应先进入 Access 登录页，非白名单账号应被拒绝，白名单账号才能列出、按需查看诊断或删除反馈。
+6. 管理页不是 Access 的替代品；即使函数内会再次验证 JWT，仍必须在 Cloudflare 边缘同时保护静态页和管理 API。
+
+## 配置可选 Webhook 短通知
+
+1. 在 Pages Production Secret 中配置 `SUPPORT_NOTIFICATION_WEBHOOK_URL`，必须为 HTTPS；不配置即完全关闭通知。
+2. Webhook 需要 Bearer 鉴权时，再配置 Secret `SUPPORT_NOTIFICATION_WEBHOOK_TOKEN`。
+3. 接收端固定接收 JSON 字段：`event`、`category`、`reportShortId`、`createdAt`、`appVersion`、`hasDiagnostics`。
+4. 通知不包含用户正文或诊断；收到短编号后登录 Access 管理页查看完整内容。
+5. Webhook 返回失败或网络不可用时，报告仍保留在 KV，客户端仍返回提交成功；不得因通知服务故障让用户重复提交。
 
 ## 发布
 

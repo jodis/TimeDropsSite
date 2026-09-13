@@ -11,6 +11,11 @@
   Referrer-Policy: no-referrer
   Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
 
+/admin/*
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /api/*
   Cache-Control: no-store
   Referrer-Policy: no-referrer

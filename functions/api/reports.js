@@ -1,3 +1,5 @@
+import { sendReportNotification } from "../_shared/report-notification.js";
+
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
@@ -196,6 +198,12 @@ export async function handleReportPost(context) {
     return json(503, { error: "service_unavailable" });
   }
 
+  const notification = sendReportNotification(context.env, { ...report, createdAt });
+  if (typeof context.waitUntil === "function") {
+    context.waitUntil(notification);
+  } else {
+    await notification;
+  }
   return json(201, { reportId: report.reportId });
 }
 
