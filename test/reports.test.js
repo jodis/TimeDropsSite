@@ -30,6 +30,7 @@ function payload(overrides = {}) {
     reportId: REPORT_ID,
     category: "issue",
     message: "生成失败，希望协助排查。",
+    contactEmail: "tester@example.test",
     appVersion: "1.0",
     versionCode: 1,
     hasDiagnostics: false,
@@ -56,6 +57,7 @@ test("校验固定分类、长度和请求头中的幂等编号", () => {
   assert.equal(validateReport(payload({ category: "unknown" }), REPORT_ID).error, "invalid_category");
   assert.equal(validateReport(payload(), "different").error, "invalid_report_id");
   assert.equal(validateReport(payload({ message: "x".repeat(4001) }), REPORT_ID).error, "invalid_payload");
+  assert.equal(validateReport(payload({ contactEmail: "invalid" }), REPORT_ID).error, "invalid_contact_email");
 });
 
 test("诊断信息必须显式声明且会在服务端二次脱敏", () => {
@@ -82,6 +84,7 @@ test("成功持久化后返回 201，重复编号返回 200 且不重复写入",
   assert.equal(duplicate.status, 200);
   assert.equal(JSON.parse(await duplicate.text()).duplicate, true);
   assert.ok(store.values.has(`report:${REPORT_ID}`));
+  assert.equal(JSON.parse(store.values.get(`report:${REPORT_ID}`)).contactEmail, "tester@example.test");
 });
 
 test("诊断正文与普通反馈分开保存", async () => {

@@ -25,6 +25,7 @@ function report(overrides = {}) {
     reportId: REPORT_ID,
     category: "suggestion",
     message: "希望增加批量操作。",
+    contactEmail: "tester@example.test",
     appVersion: "1.0",
     versionCode: 1,
     hasDiagnostics: true,
@@ -107,9 +108,11 @@ test("管理接口列出详情、按需读取诊断并可同时删除", async ()
   const listPayload = await listResponse.json();
   assert.equal(listPayload.reports.length, 1);
   assert.equal(listPayload.reports[0].message, "希望增加批量操作。");
+  assert.equal(listPayload.reports[0].contactEmail, "tester@example.test");
 
   const detailResponse = await getReport(store, new Request(`https://timedrops.example/api/admin/reports?id=${REPORT_ID}&includeDiagnostics=1`));
   const detailPayload = await detailResponse.json();
+  assert.equal(detailPayload.report.contactEmail, "tester@example.test");
   assert.equal(detailPayload.diagnostic.diagnostics, "[APP_START] 启动");
 
   const deleteResponse = await deleteReport(store, new Request(`https://timedrops.example/api/admin/reports?id=${REPORT_ID}`, { method: "DELETE" }));

@@ -8,6 +8,7 @@ const JSON_HEADERS = {
 
 const REPORT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED_CATEGORIES = new Set(["issue", "suggestion", "other"]);
+const CONTACT_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 客户端上限按字符计算；预留 UTF-8 四字节字符和 JSON 转义开销，避免合法诊断被字节门槛误拒绝。
 const MAX_BODY_BYTES = 600 * 1024;
 const MAX_MESSAGE_CHARS = 4_000;
@@ -61,6 +62,11 @@ export function validateReport(payload, reportIdHeader) {
   }
 
   const message = cleanText(payload.message, MAX_MESSAGE_CHARS);
+  // 旧版客户端没有联系邮箱字段，保持其反馈可读；新版一旦传入则必须是有效邮箱。
+  const contactEmail = optionalText(payload.contactEmail, 254);
+  if (payload.contactEmail !== undefined && (!contactEmail || !CONTACT_EMAIL_PATTERN.test(contactEmail))) {
+    return { error: "invalid_contact_email" };
+  }
   const appVersion = cleanText(payload.appVersion, 64);
   const versionCode = Number.isSafeInteger(payload.versionCode) && payload.versionCode >= 1
     ? payload.versionCode
@@ -96,6 +102,7 @@ export function validateReport(payload, reportIdHeader) {
       reportId,
       category: payload.category,
       message,
+      contactEmail,
       appVersion,
       versionCode,
       hasDiagnostics: payload.hasDiagnostics,
@@ -187,6 +194,7 @@ export async function handleReportPost(context) {
       reportId: report.reportId,
       category: report.category,
       message: report.message,
+      contactEmail: report.contactEmail,
       appVersion: report.appVersion,
       versionCode: report.versionCode,
       hasDiagnostics: report.hasDiagnostics,

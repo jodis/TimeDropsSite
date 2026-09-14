@@ -70,6 +70,8 @@ function renderReport(report) {
   fragment.querySelector(".report-id").textContent = `#${String(report.reportId).slice(0, 8)}`;
   fragment.querySelector(".report-time").textContent = formatTime(report.createdAt);
   fragment.querySelector(".report-message").textContent = report.message;
+  // 旧客户端的历史记录没有联系邮箱，明确标记而不伪造或猜测账号资料。
+  fragment.querySelector(".report-contact-email").textContent = report.contactEmail || "未提供（旧版记录）";
   fragment.querySelector(".report-version").textContent = `${report.appVersion} (${report.versionCode})`;
   fragment.querySelector(".report-diagnostic-state").textContent = report.hasDiagnostics ? "用户已附带" : "未附带";
   fragment.querySelector(".report-expiry").textContent = formatTime(report.expiresAt);

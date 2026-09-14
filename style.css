@@ -124,7 +124,7 @@ h1 { max-width: 14ch; margin: 0; font-size: clamp(2.3rem, 7vw, 4.5rem); line-hei
 .report-id { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
 .report-time { color: var(--td-secondary); font-size: .84rem; }
 .report-message { white-space: pre-wrap; color: var(--td-text) !important; }
-.report-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin: 1rem 0; }
+.report-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin: 1rem 0; }
 .report-meta div { min-width: 0; }
 .report-meta dt { color: var(--td-secondary); font-size: .78rem; }
 .report-meta dd { margin: .15rem 0 0; font-size: .9rem; }
